@@ -81,6 +81,10 @@ ConfigParser.java 配置文件解析类，校验配置有效性也在这里完�
 
 ConnectionHelper.java Mysql 链接获取以及操作类
 
+## 致谢
+
+生成PO文件的逻辑是在同事的基础上修改完成，修改引用了同事(仇老板)的parse(我修改为了genDBDictionary)，自动生成字段，get，set方法，文件输出等逻辑，在此表示感谢~~~
+
 ##联系
 Author:JackWang
 
