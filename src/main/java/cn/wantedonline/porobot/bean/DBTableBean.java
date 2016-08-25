@@ -28,7 +28,6 @@ public class DBTableBean {
 	private String databaseName;
 	private String tableName;
 	private List<DBColumn> columns = new ArrayList<DBColumn>();
-	private String columnSize;
 	
 	public String getDatabaseName() {
 		return databaseName;

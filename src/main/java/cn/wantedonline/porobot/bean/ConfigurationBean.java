@@ -17,7 +17,9 @@ package cn.wantedonline.porobot.bean;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -44,6 +46,12 @@ public class ConfigurationBean {
 	private List<JDBCConfigBean> jdbcConfigs;
 	
 	private String driver;
+	
+	private HashMap<String, List<String>> excludeTableMap;
+	
+	public Map<String, List<String>> getExcludeTableMap() {
+		return excludeTableMap;
+	}
 	
 	public String getGlobalUserName() {
 		return globalUserName;
@@ -89,6 +97,7 @@ public class ConfigurationBean {
 		this.poSuffix = configProperties.getProperty(Constant.PO_SUFFIX, Constant.DEFAULT_PO_SUFFIX);
 		this.isSerialized = new Boolean(configProperties.getProperty(Constant.SERIALIZE, "true"));
 		this.jdbcConfigs = getJDBCConfigBeans(configProperties);
+		this.excludeTableMap = getExcludeTableMap(configProperties);
 	}
 	
 	//================================Private Method Area===============================
@@ -114,8 +123,41 @@ public class ConfigurationBean {
 		return jdbcBeans;
 	}
 	
+	/**
+	 * @param configProperties
+	 * @return
+	 */
+	private static HashMap<String, List<String>> getExcludeTableMap(Properties configProperties) {
+		Set<String> keys = configProperties.stringPropertyNames();
+		HashMap<String, List<String>> rtnMap = new HashMap<>();
+		for (String key : keys) {
+			if (isExcludeKey(key)) {
+				String dbSchema = key.substring(Constant.JDBC_EXCLUDE_PREFIX.length());
+				String excludeTables = configProperties.getProperty(key);
+				if (null != excludeTables) {
+					rtnMap.put(dbSchema, convertStr2List(excludeTables));
+				}
+			}
+		}
+		
+		return rtnMap;
+	}
+	
+	private static boolean isExcludeKey(String str) {
+		return str.startsWith(Constant.JDBC_EXCLUDE_PREFIX);
+	}
+	
 	private static boolean isJDBCUrl(String str) {
 		return str.startsWith(Constant.JDBC_URL_PREFIX);
+	}
+	
+	private static List<String> convertStr2List(String str) {
+		String[] strs = str.split(",");
+		List<String> rtnList = new ArrayList<>(strs.length);
+		for (String s : strs) {
+			rtnList.add(s);
+		}
+		return rtnList;
 	}
 	
 }

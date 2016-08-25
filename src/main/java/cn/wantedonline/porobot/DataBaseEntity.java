@@ -57,7 +57,7 @@ public class DataBaseEntity {
 	 */
 	public static void genDataBasePOFile(boolean genDBDir) {
 		List<Connection> connections = ConnectionHelper.getConnections();
-
+		
 		for (Connection connection : connections) {
 			List<String> tableNames = getAllTableName(connection);
 			List<DBTableBean> tableBeanList = new ArrayList<>(tableNames.size());
@@ -106,7 +106,6 @@ public class DataBaseEntity {
 			String schema = connection.getCatalog();
 			rtnBean.setDatabaseName(schema);
 			ResultSet resultSet = connection.getMetaData().getColumns(schema, "", tableName, "");
-			
 			while (resultSet.next()) {
 				String columnName = resultSet.getString("COLUMN_NAME");
 				String columnType = resultSet.getString("TYPE_NAME");
@@ -138,8 +137,15 @@ public class DataBaseEntity {
 			Statement stat = connection.createStatement();
 			ResultSet resultSet = stat.executeQuery(sql);
 			List<String> rtnList = new ArrayList<String>();
+			List<String> excludeTables = new ArrayList<>();
+			if (configBean.getExcludeTableMap().containsKey(schema)) {
+				excludeTables = configBean.getExcludeTableMap().get(schema);
+			}
 			while (resultSet.next()) {
 				String tableName = resultSet.getString(1);
+				if (excludeTables.contains(tableName)) {
+					continue;
+				}
 				rtnList.add(tableName);
 			}
 			return rtnList;
@@ -203,6 +209,10 @@ public class DataBaseEntity {
 			sb.append("import java.util.Date;\r\n");
 		}
 		
+		if (ConnectionHelper.configBean.isSerialized()) {
+			sb.append("import java.io.Serializable;\r\n");
+		}
+		
 		sb.append("\r\n");
 		//注释部分
 		sb.append("   /**\r\n");
@@ -210,7 +220,11 @@ public class DataBaseEntity {
 		sb.append("    * "+new Date()+" By PORobot \r\n");
 		sb.append("    */ \r\n");
 		//实体部分
-		sb.append("\r\n\r\npublic class " + initcap(tableBean.getTableName()) + ConnectionHelper.configBean.getPoSuffix() + "{\r\n");
+		if (ConnectionHelper.configBean.isSerialized()) {
+			sb.append("\r\n\r\npublic class " + initcap(tableBean.getTableName()) + ConnectionHelper.configBean.getPoSuffix() + "implements Serializable {\r\n");
+		} else {
+			sb.append("\r\n\r\npublic class " + initcap(tableBean.getTableName()) + ConnectionHelper.configBean.getPoSuffix() + "{\r\n");
+		}
 		processAllAttrs(sb, tableBean);//属性
 		sb.append("\r\n\r\n");
 		processAllMethod(sb, tableBean);//get set方法

@@ -34,4 +34,5 @@ public class Constant {
 	public static final String JDBC_URL_PREFIX = "url_";
 	public static final String JDBC_USERNAME_PREFIX = "username_";
 	public static final String JDBC_PASSWORD_PREFIX = "password_";
+	public static final String JDBC_EXCLUDE_PREFIX = "exclude_";
 }
